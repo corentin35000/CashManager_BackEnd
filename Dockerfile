@@ -12,4 +12,4 @@ COPY . .
 ENV CHOKIDAR_USEPOLLING=true
 
 # Drop all tables, migrate, and run seeders AND run server
-CMD npm run dev
+CMD npm run adonis:migration:fresh:develop && npm run dev
