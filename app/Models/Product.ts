@@ -19,7 +19,7 @@ export default class Product extends BaseModel {
 
   @column()
   public image: string
-  
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

@@ -13,7 +13,15 @@ export default class Bank extends BaseModel {
     foreignKey: 'users_id',
   })
   public user: BelongsTo<typeof User>
-  
+
+  @column()
+  public number_failed: number
+
+  @column()
+  public card_cap: number
+
+  @column()
+  public total_amount: number
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

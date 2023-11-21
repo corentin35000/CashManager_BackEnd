@@ -14,15 +14,14 @@ export default class Cart extends BaseModel {
     foreignKey: 'users_id',
   })
   public user: BelongsTo<typeof User>
-  
+
   @column()
   public product_id: number
-  
+
   @belongsTo(() => Product, {
     foreignKey: 'products_id',
   })
   public product: BelongsTo<typeof Product>
-  
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
