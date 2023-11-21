@@ -11,7 +11,7 @@ export default class Cart extends BaseModel {
   public user_id: number
 
   @belongsTo(() => User, {
-    foreignKey: 'users_id',
+    foreignKey: 'user_id',
   })
   public user: BelongsTo<typeof User>
 
@@ -19,7 +19,7 @@ export default class Cart extends BaseModel {
   public product_id: number
 
   @belongsTo(() => Product, {
-    foreignKey: 'products_id',
+    foreignKey: 'product_id',
   })
   public product: BelongsTo<typeof Product>
 

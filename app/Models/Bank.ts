@@ -10,7 +10,7 @@ export default class Bank extends BaseModel {
   public user_id: number
 
   @belongsTo(() => User, {
-    foreignKey: 'users_id',
+    foreignKey: 'user.id',
   })
   public user: BelongsTo<typeof User>
 
