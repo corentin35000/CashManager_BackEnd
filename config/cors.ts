@@ -45,8 +45,7 @@ const corsConfig: CorsConfig = {
   |                     one of the above values.
   |
   */
-  origin: true,
-
+  origin: '*',
   /*
   |--------------------------------------------------------------------------
   | Methods

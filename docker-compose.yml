@@ -12,7 +12,7 @@ services:
       - .:/app
       - node_modules:/app/node_modules
     ports:
-      - '3400:3400'
+      - '8080:8080'
     depends_on:
       - database_mariadb2
       - phpmyadmin2
