@@ -13,6 +13,7 @@ export const CartFactory = Factory.define(Cart, async ({ faker }) => {
   return {
     user_id: randomUser.id, // user_id fictif
     product_id: randomProduct.id, // product_id fictif
+    quantity: faker.number.int({ min: 1, max: randomProduct.quantity }),
     // Ajoutez d'autres champs si nécessaire
   }
 }).build()

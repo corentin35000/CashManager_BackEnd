@@ -11,6 +11,21 @@ export default class CartsService {
     }
   }
 
+  //Get cart by user id and product id
+  public static async getCartByUserIdAndProductId(
+    userId: number,
+    productId: number
+  ): Promise<Cart[]> {
+    try {
+      return await Cart.query()
+        .where('user_id', userId)
+        .where('product_id', productId)
+        .preload('product')
+    } catch (error) {
+      throw new InternalServerErrorException(error.message)
+    }
+  }
+
   //Add product to cart
   public static async addProductToCart(userId: number, productId: number): Promise<void> {
     try {

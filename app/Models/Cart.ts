@@ -23,6 +23,9 @@ export default class Cart extends BaseModel {
   })
   public product: BelongsTo<typeof Product>
 
+  @column()
+  public quantity: number
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

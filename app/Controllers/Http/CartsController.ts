@@ -1,13 +1,23 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Cart from 'App/Models/Cart'
 import CartsService from 'App/Services/CartsService'
-import GetCartByUserIdValidator from 'App/Validators/Cart/GetCartByUserIdValidator'
 import AddProductToCartValidator from 'App/Validators/Cart/AddProductToCartValidator'
 export default class CartsController {
   //function to get cart by userId
   public async getCartByUserId({ params, response }: HttpContextContract): Promise<void> {
     const userId: number = params.userId
     const carts: Cart[] = await CartsService.getCartByUserId(userId)
+    response.status(200).json(carts)
+  }
+
+  // function to get cart by user id and product id
+  public async getCartByUserIdAndProductId({
+    params,
+    response,
+  }: HttpContextContract): Promise<void> {
+    const userId: number = params.userId
+    const productId: number = params.productId
+    const carts: Cart[] = await CartsService.getCartByUserIdAndProductId(userId, productId)
     response.status(200).json(carts)
   }
 
