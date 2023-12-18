@@ -29,7 +29,15 @@ export default class CartsService {
   //Add product to cart
   public static async addProductToCart(userId: number, productId: number): Promise<void> {
     try {
-      await Cart.create({ user_id: userId, product_id: productId })
+      const cart: Cart | null = await Cart.find({ user_id: userId, product_id: productId })
+
+      if (cart) {
+        cart.quantity += 1
+        await cart.save()
+        return
+      } else {
+        await Cart.create({ user_id: userId, product_id: productId })
+      }
     } catch (error) {
       throw new InternalServerErrorException(error.message)
     }
