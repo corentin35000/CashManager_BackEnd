@@ -53,7 +53,13 @@ export default class CartsService {
         .where('user_id', userId)
         .where('product_id', productId)
         .firstOrFail()
-      await cart.delete()
+      if (cart.quantity > 1) {
+        cart.quantity -= 1
+        await cart.save()
+        return
+      } else {
+        await cart.delete()
+      }
     } catch (error) {
       throw new InternalServerErrorException(error.message)
     }
