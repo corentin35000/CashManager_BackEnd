@@ -7,6 +7,16 @@ export type responseBank = {
   message: string
 }
 export default class BanksService {
+  //function to get bank details
+  public static async getBankDetails(userId: number): Promise<Bank> {
+    try {
+      const bank: Bank = await Bank.query().where('user_id', userId).firstOrFail()
+      return bank
+    } catch (error) {
+      throw new InternalServerErrorException(error.message)
+    }
+  }
+
   //function to check if user is eligible to pay by bank check
   public static async checkUserEligibilityByBankCheckAndPay(
     userId: number,
