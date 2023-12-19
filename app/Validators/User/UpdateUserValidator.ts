@@ -5,7 +5,6 @@ export default class UpdateUserValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
-    id: schema.number([rules.required(), rules.exists({ table: 'users', column: 'id' })]),
     firstname: schema.string.optional({ trim: true }, [rules.minLength(4), rules.maxLength(22)]),
     lastname: schema.string.optional({ trim: true }, [rules.minLength(4), rules.maxLength(22)]),
     email: schema.string.optional({ trim: true }, [rules.email()]),
