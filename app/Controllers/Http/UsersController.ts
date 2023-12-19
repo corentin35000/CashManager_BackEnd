@@ -22,16 +22,18 @@ export default class UsersController {
   }
 
   //function to update a user
-  private async updateUser({ request, response }: HttpContextContract): Promise<void> {
+  private async updateUser({ request, params, response }: HttpContextContract): Promise<void> {
+    const userId: number = params.id
     const payload = await request.validate(UpdateUserValidator)
-    await UsersService.updateUser(payload)
-    response.status(204).noContent()
+    const data = { ...payload, id: userId }
+    const user: User = await UsersService.updateUser(data)
+    response.status(200).json(user)
   }
 
   //function to delete a user
-  private async deleteUser({ request, response }: HttpContextContract): Promise<void> {
-    const payload: { id: number } = await request.validate(DeleteUserValidator)
-    await UsersService.deleteUser(payload.id)
+  private async deleteUser({ params, response }: HttpContextContract): Promise<void> {
+    const userId: number = await params.validate(DeleteUserValidator)
+    await UsersService.deleteUser(userId)
     response.status(204).noContent()
   }
 }

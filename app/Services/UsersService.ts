@@ -32,11 +32,11 @@ export default class UsersService {
   }
 
   //Update user
-  public static async updateUser(payload: Record<string, any>): Promise<void> {
+  public static async updateUser(payload: Record<string, any>): Promise<User> {
     const user: User = await User.findOrFail(payload.id)
-
     try {
       await user.merge(payload).save()
+      return user
     } catch (error) {
       throw new BadRequestException(error.message)
     }
