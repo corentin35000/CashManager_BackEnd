@@ -1,6 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, beforeSave } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, column, beforeSave, hasMany } from '@ioc:Adonis/Lucid/Orm'
+import type { HasMany } from '@ioc:Adonis/Lucid/Orm'
 import Hash from '@ioc:Adonis/Core/Hash'
+import Order from 'App/Models/Order'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -17,6 +19,9 @@ export default class User extends BaseModel {
 
   @column({ serializeAs: null })
   public password: string
+
+  @hasMany(() => Order)
+  public orders: HasMany<typeof Order>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

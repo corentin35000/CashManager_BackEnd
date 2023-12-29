@@ -22,6 +22,7 @@ import './routes/auth'
 import './routes/users'
 import './routes/product'
 import './routes/cart'
+import './routes/order'
 
 Route.get('/', async () => {
   return { hello: 'test' }
