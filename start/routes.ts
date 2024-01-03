@@ -23,6 +23,7 @@ import './routes/users'
 import './routes/product'
 import './routes/cart'
 import './routes/bank'
+import './routes/order'
 
 Route.get('/', async () => {
   return { hello: 'test' }
