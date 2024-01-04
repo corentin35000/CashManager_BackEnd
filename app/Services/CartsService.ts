@@ -26,6 +26,24 @@ export default class CartsService {
     }
   }
 
+  //Update product quantity
+  public static async updateProductQuantity(
+    userId: number,
+    productId: number,
+    quantity: number
+  ): Promise<void> {
+    try {
+      const cart: Cart = await Cart.query()
+        .where('user_id', userId)
+        .where('product_id', productId)
+        .firstOrFail()
+      cart.quantity = quantity
+      await cart.save()
+    } catch (error) {
+      throw new InternalServerErrorException(error.message)
+    }
+  }
+
   //Add product to cart
   public static async addProductToCart(userId: number, productId: number): Promise<void> {
     try {
@@ -53,11 +71,17 @@ export default class CartsService {
         .where('user_id', userId)
         .where('product_id', productId)
         .firstOrFail()
-      if (cart.quantity > 1) {
-        cart.quantity -= 1
-        await cart.save()
-        return
-      } else {
+      await cart.delete()
+    } catch (error) {
+      throw new InternalServerErrorException(error.message)
+    }
+  }
+
+  //Delete all carts from user
+  public static async deleteAllCartFromUser(userId: number): Promise<void> {
+    const carts: Cart[] = await Cart.query().where('user_id', userId)
+    try {
+      for (const cart of carts) {
         await cart.delete()
       }
     } catch (error) {
@@ -65,19 +89,7 @@ export default class CartsService {
     }
   }
 
-  //Delete all cart from user
-  public static async deleteAllCartFromUser(userId: number): Promise<void> {
-    const carts: Cart[] = await Cart.query().where('user_id', userId)
-    try {
-      carts.forEach(async (cart) => {
-        await cart.delete()
-      })
-    } catch (error) {
-      throw new InternalServerErrorException(error.message)
-    }
-  }
-
-  //function to calculate total amount of carts
+  //function to calculate total number of carts
   public static async calculateAmountForCarts(userId: number): Promise<number> {
     let cartAmount: number = 0
     try {

@@ -2,6 +2,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Cart from 'App/Models/Cart'
 import CartsService from 'App/Services/CartsService'
 import AddProductToCartValidator from 'App/Validators/Cart/AddProductToCartValidator'
+import UpdateProductQuantityValidator from 'App/Validators/Cart/UpdateProductQuantityValidator'
 export default class CartsController {
   //function to get cart by userId
   public async getCartByUserId({ params, response }: HttpContextContract): Promise<void> {
@@ -30,14 +31,10 @@ export default class CartsController {
   }
 
   //function to delete product from cart
-  public async deleteProductFromCart({
-    request,
-    params,
-    response,
-  }: HttpContextContract): Promise<void> {
+  public async deleteProductFromCart({ params, response }: HttpContextContract): Promise<void> {
     const userId: number = params.userId
-    const payload: { product_id: number } = await request.validate(AddProductToCartValidator)
-    await CartsService.deleteProductFromCart(userId, payload.product_id)
+    const productId: number = params.productId
+    await CartsService.deleteProductFromCart(userId, productId)
     response.status(204).noContent()
   }
 
@@ -46,5 +43,19 @@ export default class CartsController {
     const userId: number = params.userId
     await CartsService.deleteAllCartFromUser(userId)
     response.status(204).noContent()
+  }
+
+  //function to update product quantity
+  public async updateProductQuantity({
+    request,
+    params,
+    response,
+  }: HttpContextContract): Promise<void> {
+    const userId: number = params.userId
+    const payload: { product_id: number; quantity: number } = await request.validate(
+      UpdateProductQuantityValidator
+    )
+    await CartsService.updateProductQuantity(userId, payload.product_id, payload.quantity)
+    response.status(200).json({ message: 'Product quantity updated' })
   }
 }
