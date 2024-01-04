@@ -1,7 +1,6 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from 'App/Models/User'
 import UsersService from 'App/Services/UsersService'
-import DeleteUserValidator from 'App/Validators/User/DeleteUserValidator'
 import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator'
 import GetUserByIdValidator from 'App/Validators/User/GetUserByIdValidator'
 import GetUserByEmailValidator from 'App/Validators/User/GetUserByEmailValidator'
@@ -32,7 +31,9 @@ export default class UsersController {
 
   //function to delete a user
   private async deleteUser({ params, response }: HttpContextContract): Promise<void> {
-    const userId: number = await params.validate(DeleteUserValidator)
+    const userId: number = params.id
+    const user: User = await UsersService.getUserById(userId)
+    if (!user) response.status(404).json({ message: 'User not found' })
     await UsersService.deleteUser(userId)
     response.status(204).noContent()
   }
