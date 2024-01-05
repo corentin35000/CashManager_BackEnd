@@ -6,6 +6,7 @@ import { InternalServerErrorException } from 'App/Exceptions/InternalServerError
 export type CreateOrderCommand = {
   userId: number
   products: { productId: number; quantity: number }[]
+  status?: 'pending' | 'paid' | 'cancelled'
 }
 
 export default class OrderService {
@@ -23,7 +24,7 @@ export default class OrderService {
       const order: Order = await Order.create({
         user_id: command.userId,
         total_amount: totalAmount,
-        status: 'pending',
+        status: command.status || 'pending',
       })
 
       // Créer les relations order products
@@ -36,16 +37,26 @@ export default class OrderService {
       }
 
       // Retourner la commande avec les produits préchargés
-      const orderCreated: Order = await Order.query()
+      return await Order.query()
         .where('id', order.id)
         .preload('orderProducts', (query) => {
           query.preload('product')
         })
         .firstOrFail()
-      return orderCreated
     } catch (error) {
       throw new InternalServerErrorException(error.message)
     }
+  }
+
+  public static async createCancelledOrder(
+    userId: number,
+    products: { productId: number; quantity: number }[]
+  ) {
+    await OrderService.createOrder({
+      userId,
+      products,
+      status: 'cancelled',
+    })
   }
 
   // Méthode pour obtenir toutes les commandes d'un utilisateur

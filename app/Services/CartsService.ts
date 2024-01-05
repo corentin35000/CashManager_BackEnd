@@ -1,11 +1,26 @@
 import { InternalServerErrorException } from 'App/Exceptions/InternalServerErrorException'
 import Cart from 'App/Models/Cart'
+import Product from 'App/Models/Product'
 
 export default class CartsService {
   //Get cart by user id
   public static async getCartByUserId(userId: number): Promise<Cart[]> {
     try {
       return await Cart.query().where('user_id', userId).preload('product')
+    } catch (error) {
+      throw new InternalServerErrorException(error.message)
+    }
+  }
+
+  // Get cart products by user id
+  public static async getCartProductsByUserId(userId: number): Promise<Product[]> {
+    try {
+      const carts: Cart[] = await Cart.query().where('user_id', userId).preload('product')
+      const products: Product[] = []
+      carts.forEach((cart) => {
+        products.push(cart.product)
+      })
+      return products
     } catch (error) {
       throw new InternalServerErrorException(error.message)
     }

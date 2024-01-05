@@ -3,6 +3,8 @@ import Bank from 'App/Models/Bank'
 import CartService from './CartsService'
 import { BadRequestException } from 'App/Exceptions/BadRequestException'
 import { ForbiddenException } from 'App/Exceptions/ForbiddenException'
+import OrderService from 'App/Services/OrderService'
+import Product from 'App/Models/Product'
 
 export type ResponseBank = {
   message: string
@@ -22,15 +24,24 @@ export default class BanksService {
     amount: number,
     userId: number
   ): Promise<ResponseBank> {
+    const cartProducts: Product[] = await CartService.getCartProductsByUserId(userId)
+    const products: { productId: number; quantity: number }[] = cartProducts.map((product) => ({
+      productId: product.id,
+      quantity: product.quantity,
+    }))
+
     if (bank.total_amount < amount) {
+      await OrderService.createCancelledOrder(userId, products)
       throw new BadRequestException('Insufficient funds', 400)
     }
 
     if (bank.card_cap < amount) {
+      await OrderService.createCancelledOrder(userId, products)
       throw new ForbiddenException('Card limit exceeded', 403)
     }
 
     if (bank.number_failed >= 3) {
+      await OrderService.createCancelledOrder(userId, products)
       throw new ForbiddenException('Maximum number of failed payments reached', 403)
     }
 
@@ -38,6 +49,11 @@ export default class BanksService {
     bank.number_failed = 0
     await bank.save()
     await CartService.deleteAllCartFromUser(userId)
+    await OrderService.createOrder({
+      userId,
+      products,
+      status: 'paid',
+    })
     return { message: 'Payment successful' }
   }
 

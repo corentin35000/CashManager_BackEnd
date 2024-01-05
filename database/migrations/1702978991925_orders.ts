@@ -9,7 +9,7 @@ export default class OrdersSchema extends BaseSchema {
       table.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE')
       table.decimal('total_amount', 12, 2).notNullable()
       table.decimal('total_paid', 12, 2).notNullable().defaultTo(0)
-      table.string('status').notNullable().defaultTo('pending') // Exemples: pending, completed, cancelled
+      table.string('status').notNullable().defaultTo('pending') // Exemples: pending, paid, cancelled
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
     })

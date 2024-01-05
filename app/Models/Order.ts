@@ -20,7 +20,7 @@ export default class Order extends BaseModel {
   public total_paid: number
 
   @column()
-  public status: string
+  public status: string // pending, paid, cancelled
 
   @hasMany(() => OrderProduct, {
     foreignKey: 'order_id',
