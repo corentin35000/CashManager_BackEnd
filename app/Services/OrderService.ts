@@ -17,7 +17,7 @@ export default class OrderService {
       let totalAmount: number = 0
       for (const item of command.products) {
         const product: Product = await Product.findOrFail(item.productId)
-        totalAmount += product.price * item.quantity
+        totalAmount += product.price * item.quantity * 100
       }
 
       // Créer la commande
