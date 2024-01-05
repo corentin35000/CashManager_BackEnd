@@ -68,6 +68,7 @@ export default class OrderService {
         .preload('orderProducts', (query) => {
           query.preload('product')
         })
+        .orderBy('created_at', 'desc')
     } catch (error) {
       throw new InternalServerErrorException(error.message)
     }
