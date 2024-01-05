@@ -12,6 +12,6 @@ export const OrderFactory = Factory.define(Order, async ({ faker }) => {
     user_id: randomUser.id,
     total_amount: randomTotal,
     total_paid: randomTotal,
-    status: faker.helpers.shuffle(['pending', 'completed', 'cancelled'])[0],
+    status: faker.helpers.shuffle(['pending', 'paid', 'cancelled'])[0],
   }
 }).build()
