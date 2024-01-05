@@ -17,8 +17,13 @@
 | import './routes/customer'
 |
 */
-
 import Route from '@ioc:Adonis/Core/Route'
+import './routes/auth'
+import './routes/users'
+import './routes/product'
+import './routes/cart'
+import './routes/bank'
+import './routes/order'
 
 Route.get('/', async () => {
   return { hello: 'test' }
