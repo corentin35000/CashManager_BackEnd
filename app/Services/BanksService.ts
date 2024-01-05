@@ -4,7 +4,7 @@ import CartService from './CartsService'
 import { BadRequestException } from 'App/Exceptions/BadRequestException'
 import { ForbiddenException } from 'App/Exceptions/ForbiddenException'
 import OrderService from 'App/Services/OrderService'
-import Product from 'App/Models/Product'
+import Cart from 'App/Models/Cart'
 
 export type ResponseBank = {
   message: string
@@ -22,22 +22,25 @@ export default class BanksService {
   private static async processPayment(
     bank: Bank,
     amount: number,
-    userId: number
+    userId: number,
+    paymentMethod: 'check' | 'card'
   ): Promise<ResponseBank> {
-    const cartProducts: Product[] = await CartService.getCartProductsByUserId(userId)
-    const products: { productId: number; quantity: number }[] = cartProducts.map((product) => ({
-      productId: product.id,
-      quantity: product.quantity,
+    const cartItems: Array<Cart> = await CartService.getCartByUserId(userId)
+    const products: { productId: number; quantity: number }[] = cartItems.map((cartItem: Cart) => ({
+      productId: cartItem.product_id,
+      quantity: cartItem.quantity,
     }))
 
     if (bank.total_amount < amount) {
+      bank.number_failed += 1
       await OrderService.createCancelledOrder(userId, products)
       throw new BadRequestException('Insufficient funds', 400)
     }
 
-    if (bank.card_cap < amount) {
+    if (paymentMethod === 'card' && bank.card_cap < amount) {
+      bank.number_failed += 1
       await OrderService.createCancelledOrder(userId, products)
-      throw new ForbiddenException('Card limit exceeded', 403)
+      throw new ForbiddenException('Credit card limit exceeded', 403)
     }
 
     if (bank.number_failed >= 3) {
@@ -68,13 +71,13 @@ export default class BanksService {
       throw new BadRequestException('Amount is less than cart total', 400)
     }
 
-    return await this.processPayment(bank, bankCheckBalance, userId)
+    return await this.processPayment(bank, cartAmount, userId, 'check')
   }
 
   public static async paidByBankCard(userId: number): Promise<ResponseBank> {
     const cartAmount: number = await CartService.calculateAmountForCarts(userId)
     const bank: Bank = await this.getBankDetails(userId)
 
-    return await this.processPayment(bank, cartAmount, userId)
+    return await this.processPayment(bank, cartAmount, userId, 'card')
   }
 }

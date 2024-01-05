@@ -8,15 +8,7 @@ export class InternalServerErrorException extends Exception {
   }
 
   public async handle(error: this, ctx: HttpContextContract): Promise<void> {
-    ctx.response.status(error.status).send({
-      errors: [
-        {
-          field: 'internal_server_error',
-          rule: 'INTERNAL_SERVER_ERROR',
-          message: error.message,
-        },
-      ],
-    })
+    ctx.response.status(error.status).send(error.message)
   }
 
   public report(error: this): void {

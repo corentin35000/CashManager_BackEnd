@@ -15,6 +15,7 @@ export default class OrderService {
     try {
       // Calculer le montant total de la commande
       let totalAmount: number = 0
+      console.log(command.products)
       for (const item of command.products) {
         const product: Product = await Product.findOrFail(item.productId)
         totalAmount += product.price * item.quantity
@@ -24,6 +25,7 @@ export default class OrderService {
       const order: Order = await Order.create({
         user_id: command.userId,
         total_amount: totalAmount,
+        total_paid: command.status === 'paid' ? totalAmount : 0,
         status: command.status || 'pending',
       })
 
