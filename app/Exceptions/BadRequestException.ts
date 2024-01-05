@@ -8,7 +8,15 @@ export class BadRequestException extends Exception {
   }
 
   public async handle(error: this, ctx: HttpContextContract): Promise<void> {
-    ctx.response.status(error.status).send(error.message)
+    ctx.response.status(error.status).send({
+      errors: [
+        {
+          field: 'bad_request',
+          rule: 'BAD_REQUEST',
+          message: error.message,
+        },
+      ],
+    })
   }
 
   public report(error: this): void {

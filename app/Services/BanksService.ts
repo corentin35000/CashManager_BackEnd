@@ -1,103 +1,64 @@
 import { InternalServerErrorException } from 'App/Exceptions/InternalServerErrorException'
 import Bank from 'App/Models/Bank'
 import CartService from './CartsService'
+import { BadRequestException } from 'App/Exceptions/BadRequestException'
+import { ForbiddenException } from 'App/Exceptions/ForbiddenException'
 
-export type responseBank = {
-  value: boolean
+export type ResponseBank = {
   message: string
 }
+
 export default class BanksService {
-  //function to get bank details
   public static async getBankDetails(userId: number): Promise<Bank> {
     try {
-      const bank: Bank = await Bank.query().where('user_id', userId).firstOrFail()
-      return bank
+      return await Bank.query().where('user_id', userId).firstOrFail()
     } catch (error) {
       throw new InternalServerErrorException(error.message)
     }
   }
 
-  //function to check if user is eligible to pay by bank check
-  public static async checkUserEligibilityByBankCheckAndPay(
+  private static async processPayment(
+    bank: Bank,
+    amount: number,
+    userId: number
+  ): Promise<ResponseBank> {
+    if (bank.total_amount < amount) {
+      throw new BadRequestException('Insufficient funds', 400)
+    }
+
+    if (bank.card_cap < amount) {
+      throw new ForbiddenException('Card limit exceeded', 403)
+    }
+
+    if (bank.number_failed >= 3) {
+      throw new ForbiddenException('Maximum number of failed payments reached', 403)
+    }
+
+    bank.total_amount -= amount
+    bank.number_failed = 0
+    await bank.save()
+    await CartService.deleteAllCartFromUser(userId)
+    return { message: 'Payment successful' }
+  }
+
+  public static async paidByBankCheck(
     userId: number,
-    amount: number
-  ): Promise<responseBank> {
-    try {
-      const cartAmount: number = await CartService.calculateAmountForCarts(userId)
-      const bank: Bank = await Bank.query().where('user_id', userId).firstOrFail()
-      if (amount >= cartAmount) {
-        if (bank.total_amount >= amount) {
-          if (bank.card_cap >= amount) {
-            if (bank.number_failed < 3) {
-              bank.total_amount -= amount
-              bank.number_failed = 0
-              await bank.save()
-              await CartService.deleteAllCartFromUser(userId)
-              return { value: true, message: 'Payement effectued' }
-            } else {
-              bank.number_failed += 1
-              await bank.save()
-              return {
-                value: false,
-                message: 'You have reached the maximum number of failed payments',
-              }
-            }
-          } else {
-            bank.number_failed += 1
-            await bank.save()
-            return {
-              value: false,
-              message: 'You have reached the maximum amount of payment by card',
-            }
-          }
-        } else {
-          bank.number_failed += 1
-          await bank.save()
-          return { value: false, message: 'You have reached the maximum amount of payment' }
-        }
-      } else {
-        bank.number_failed += 1
-        await bank.save()
-        return { value: false, message: 'The amount is not enough' }
-      }
-    } catch (error) {
-      throw new InternalServerErrorException(error.message)
+    bankCheckBalance: number
+  ): Promise<ResponseBank> {
+    const cartAmount: number = await CartService.calculateAmountForCarts(userId)
+    const bank: Bank = await this.getBankDetails(userId)
+
+    if (bankCheckBalance < cartAmount) {
+      throw new BadRequestException('Amount is less than cart total', 400)
     }
+
+    return await this.processPayment(bank, bankCheckBalance, userId)
   }
 
-  //function to check if user is eligible to pay by bank transfer
-  public static async checkUserEligibilityByBankCardAndPay(userId: number): Promise<responseBank> {
-    try {
-      const cartAmount: number = await CartService.calculateAmountForCarts(userId)
-      const bank: Bank = await Bank.query().where('user_id', userId).firstOrFail()
-      if (bank.total_amount >= cartAmount) {
-        if (bank.card_cap >= cartAmount) {
-          if (bank.number_failed < 3) {
-            bank.total_amount -= cartAmount
-            bank.number_failed = 0
-            await bank.save()
-            await CartService.deleteAllCartFromUser(userId)
-            return { value: true, message: 'Payement effectued' }
-          } else {
-            bank.number_failed += 1
-            await bank.save()
-            return {
-              value: false,
-              message: 'You have reached the maximum number of failed payments',
-            }
-          }
-        } else {
-          bank.number_failed += 1
-          await bank.save()
-          return { value: false, message: 'You have reached the maximum amount of payment' }
-        }
-      } else {
-        bank.number_failed += 1
-        await bank.save()
-        return { value: false, message: 'The amount is not enough' }
-      }
-    } catch (error) {
-      throw new InternalServerErrorException(error.message)
-    }
+  public static async paidByBankCard(userId: number): Promise<ResponseBank> {
+    const cartAmount: number = await CartService.calculateAmountForCarts(userId)
+    const bank: Bank = await this.getBankDetails(userId)
+
+    return await this.processPayment(bank, cartAmount, userId)
   }
 }

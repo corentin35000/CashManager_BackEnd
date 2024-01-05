@@ -8,7 +8,15 @@ export class ForbiddenException extends Exception {
   }
 
   public async handle(error: this, ctx: HttpContextContract): Promise<void> {
-    ctx.response.status(error.status).send(error.message)
+    ctx.response.status(error.status).send({
+      errors: [
+        {
+          field: 'forbidden',
+          rule: 'FORBIDDEN',
+          message: error.message,
+        },
+      ],
+    })
   }
 
   public report(error: this): void {
